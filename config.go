@@ -13,7 +13,8 @@ type Config struct {
 }
 
 type ServerConfig struct {
-	Port int `yaml:"port"`
+	Port   int    `yaml:"port"`
+	LogDir string `yaml:"log_dir"`
 }
 
 type ProviderConfig struct {
@@ -38,6 +39,10 @@ func LoadConfig(path string) (*Config, error) {
 
 	if cfg.Server.Port == 0 {
 		cfg.Server.Port = 8080
+	}
+
+	if cfg.Server.LogDir == "" {
+		cfg.Server.LogDir = "logs"
 	}
 
 	if len(cfg.Providers) == 0 {

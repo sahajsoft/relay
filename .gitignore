@@ -32,3 +32,6 @@ Thumbs.db
 
 # Config with real API keys
 config.yaml
+
+# Conversation logs
+logs/

@@ -1,5 +1,6 @@
 server:
   port: 8080
+  log_dir: logs
 
 providers:
   openai:

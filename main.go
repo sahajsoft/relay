@@ -25,8 +25,14 @@ func main() {
 		cfg.Server.Port = *port
 	}
 
+	convLogger, err := NewConversationLogger(cfg.Server.LogDir)
+	if err != nil {
+		slog.Error("failed to create conversation logger", "error", err)
+		os.Exit(1)
+	}
+
 	mux := http.NewServeMux()
-	registerProviders(mux, cfg)
+	registerProviders(mux, cfg, convLogger)
 	registerHealthCheck(mux)
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
@@ -43,14 +49,14 @@ func main() {
 	}
 }
 
-func registerProviders(mux *http.ServeMux, cfg *Config) {
+func registerProviders(mux *http.ServeMux, cfg *Config, cl *ConversationLogger) {
 	for name, providerCfg := range cfg.Providers {
 		proxy, err := NewProviderProxy(name, providerCfg)
 		if err != nil {
 			slog.Error("failed to create proxy", "provider", name, "error", err)
 			os.Exit(1)
 		}
-		mux.Handle("/"+name+"/", proxy)
+		mux.Handle("/"+name+"/", cl.Wrap(name, proxy))
 		slog.Info("registered provider", "name", name, "target", providerCfg.BaseURL)
 	}
 }
