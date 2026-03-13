@@ -26,24 +26,8 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-
-	// Register provider proxies
-	for name, providerCfg := range cfg.Providers {
-		proxy, err := NewProviderProxy(name, providerCfg)
-		if err != nil {
-			slog.Error("failed to create proxy", "provider", name, "error", err)
-			os.Exit(1)
-		}
-		pattern := "/" + name + "/"
-		mux.Handle(pattern, proxy)
-		slog.Info("registered provider", "name", name, "target", providerCfg.BaseURL)
-	}
-
-	// Health check
-	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
-	})
+	registerProviders(mux, cfg)
+	registerHealthCheck(mux)
 
 	addr := fmt.Sprintf(":%d", cfg.Server.Port)
 	server := &http.Server{
@@ -57,6 +41,25 @@ func main() {
 		slog.Error("server error", "error", err)
 		os.Exit(1)
 	}
+}
+
+func registerProviders(mux *http.ServeMux, cfg *Config) {
+	for name, providerCfg := range cfg.Providers {
+		proxy, err := NewProviderProxy(name, providerCfg)
+		if err != nil {
+			slog.Error("failed to create proxy", "provider", name, "error", err)
+			os.Exit(1)
+		}
+		mux.Handle("/"+name+"/", proxy)
+		slog.Info("registered provider", "name", name, "target", providerCfg.BaseURL)
+	}
+}
+
+func registerHealthCheck(mux *http.ServeMux) {
+	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	})
 }
 
 func loggingMiddleware(next http.Handler) http.Handler {

@@ -19,6 +19,13 @@ Relay is a reverse proxy for LLM APIs written in Go. It routes requests to diffe
 - Test: `go test ./...`
 - Dependencies: `gopkg.in/yaml.v3`
 
+## Coding Style
+
+- Extract logic into small, well-named functions — no inline comments
+- Function names should be readable and self-explanatory
+- No comments in code; if something needs a comment, rename or refactor instead
+- Always add tests when adding or changing functionality
+
 ## Key Design Decisions
 
 - Single `package main`, no sub-packages

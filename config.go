@@ -29,7 +29,6 @@ func LoadConfig(path string) (*Config, error) {
 		return nil, fmt.Errorf("reading config: %w", err)
 	}
 
-	// Expand environment variables in the YAML
 	expanded := os.ExpandEnv(string(data))
 
 	var cfg Config
